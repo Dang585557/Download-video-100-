@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ดาวน์โหลดวิดีโอ Facebook</title>
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <h1>ดาวน์โหลดวิดีโอ Facebook</h1>
+  <form id="download-form">
+    <input type="url" id="url" placeholder="วางลิงก์วิดีโอ Facebook ที่นี่" required />
+    <button type="submit">ดาวน์โหลด</button>
+  </form>
+  <div id="result"></div>
+
+  <script>
+    document.getElementById('download-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const url = document.getElementById('url').value;
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerText = 'กำลังโหลด...';
+
+      try {
+        const res = await fetch(`/api/getVideo?url=${encodeURIComponent(url)}`);
+        const data = await res.json();
+        if (data.formats && data.formats.length > 0) {
+          resultDiv.innerHTML = data.formats.map(f => `
+            <p><a href="${f.url}" target="_blank">ความละเอียด ${f.format_note} (${f.height}p)</a></p>
+          `).join('');
+        } else {
+          resultDiv.innerText = 'ไม่พบวิดีโอ';
+        }
+      } catch (err) {
+        resultDiv.innerText = 'เกิดข้อผิดพลาด: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
